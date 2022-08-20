@@ -35,15 +35,21 @@
             class="status"
             @change="updateBurger($event, burger.id)"
           >
+            <!-- o selected faz uma comparacao com o status do hamburguer selecionado
+                se o status dele é igual ao tipo do statusAtual, se for igual
+                irá ser feita uma selecao da opcao, fazendo com q todos os hamburgueres
+                fiquem como "solicitados", que é o que o banco ja inicia novos pedidos -->
             <option
-              :value="s.tipo"
-              v-for="s in status"
-              :key="s.id"
-              :selected="burger.status == s.tipo"
+              :value="statusAtual.tipo"
+              v-for="statusAtual in status"
+              :key="statusAtual.id"
+              :selected="burger.status == statusAtual.tipo"
             >
-              {{ s.tipo }}
+              {{ statusAtual.tipo }}
             </option>
           </select>
+
+          <!-- removendo o pedido  -->
           <button class="delete-btn" @click="deleteBurger(burger.id)">
             Cancelar
           </button>
@@ -75,27 +81,39 @@ export default {
       const data = await requisicaoGetPedidos.json();
 
       this.burgers = data;
-      
+
       // obtendo status dos pedidos
       this.getStatus();
     },
 
+    // resgatando os 3 tipos de status que existem no banco para
+    //     o front apenas iterar sobre eles
     async getStatus() {
-      const req = await fetch("http://localhost:3000/status");
+      const requisicaoGetStatus = await fetch("http://localhost:3000/status");
 
-      const data = await req.json();
+      const data = await requisicaoGetStatus.json();
 
       this.status = data;
     },
+
+    // removendo pedido do banco de dados
     async deleteBurger(id) {
-      const req = await fetch(`http://localhost:3000/burgers/${id}`, {
-        method: "DELETE",
-      });
+      // informa a requisicao que o metodo a ser aplicado sobre o requisicaoDeleteHamburguer
+      //     com esse id seja deletado da base de dados
+      const requisicaoDeleteHamburguer = await fetch(
+        `http://localhost:3000/burgers/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
-      const res = await req.json();
+      const responseDeleteHamburguer = await requisicaoDeleteHamburguer.json();
 
+      // resgata os pedidos novamente para atualizar pagina
       this.getPedidos();
     },
+
+    // atualizando o status do pedido 
     async updateBurger(event, id) {
       const option = event.target.value;
 
