@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p>componen</p>
+    <Message :mensagem="this.mensagem" v-show="this.mensagem" />
     <div>
       <form id="burger-form" @submit="createBurguer">
         <!-- informacoes nome -->
@@ -71,6 +71,8 @@
 </template>
 
 <script>
+import Message from "./Message.vue";
+
 export default {
   name: "BurguerForms",
   data() {
@@ -82,8 +84,11 @@ export default {
       pao: null,
       carne: null,
       opcionais: [],
-      msg: null,
+      mensagem: null,
     };
+  },
+  components: {
+    Message,
   },
   methods: {
     async getIngredientes() {
@@ -122,21 +127,27 @@ export default {
         "http://localhost:3000/burgers",
         {
           method: "POST",
-          // informar que a comunicacao é feita por json 
-          headers: {"Content-Type":"application/json"},
+          // informar que a comunicacao é feita por json
+          headers: { "Content-Type": "application/json" },
           body: dataJson,
         }
       );
 
-      const respostaRequisicaoEnviarForm = requisicaoEnviarForm.json();
+      const respostaRequisicaoEnviarForm = await requisicaoEnviarForm.json();
 
       // console.log(respostaRequisicaoEnviarForm);
 
-      // limpando dados 
+      // mensagem do sistema a ser mostrada acima do form
+      this.mensagem = `Pedido Nº: ${respostaRequisicaoEnviarForm.id} realizado com sucesso!`;
+
+      // limpando dados
       this.nome = "";
       this.carne = "";
       this.pao = "";
       this.opcionais = "";
+
+      // limpando mensagem
+      setTimeout(() => (this.mensagem = ""), 5000);
     },
   },
   mounted() {
