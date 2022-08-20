@@ -1,5 +1,6 @@
 <template>
   <div id="burger-table" v-if="this.burgers">
+    <Message :mensagem="this.mensagem" v-show="this.mensagem" />
     <!-- header da tabela -->
     <div>
       <div id="burger-table-heading">
@@ -30,6 +31,8 @@
         <!-- atualizar status do pedido, poderia posteriormente criar uma condicao
             para diferenciar o acesso desta opção para um gerente ou cliente -->
         <div>
+          <!-- o evento de chance escuta a aplicacao e caso haja alguma mudanca
+                ele chama a funcao -->
           <select
             name="status"
             class="status"
@@ -62,6 +65,8 @@
   </div>
 </template>
 <script>
+import Message from "./Message.vue";
+
 export default {
   name: "Dashboard",
 
@@ -70,7 +75,12 @@ export default {
       burgers: null,
       burger_id: null,
       status: [],
+      mensagem: null,
     };
+  },
+
+  components: {
+    Message,
   },
 
   methods: {
@@ -109,25 +119,44 @@ export default {
 
       const responseDeleteHamburguer = await requisicaoDeleteHamburguer.json();
 
+      //   console.log(responseDeleteHamburguer);
+
+      // mensagem do sistema a ser mostrada acima do form
+      this.mensagem = `Pedido Nº: ${id} cancelado com sucesso!`;
+      // limpando mensagem
+      setTimeout(() => (this.mensagem = ""), 3000);
+
       // resgata os pedidos novamente para atualizar pagina
       this.getPedidos();
     },
 
-    // atualizando o status do pedido 
+    // atualizando o status do pedido
     async updateBurger(event, id) {
+      // obtencao o status selecionado pelo usuario
       const option = event.target.value;
 
+      // colocando em string o status para realizar a requisicao
       const dataJson = JSON.stringify({ status: option });
 
-      const req = await fetch(`http://localhost:3000/burgers/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: dataJson,
-      });
+      // o metodo PATH se parece com o UPDATE, porem ele atualiza somente
+      //     o campo selecionado
+      const requisicaoUpdateHamburguer = await fetch(
+        `http://localhost:3000/burgers/${id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: dataJson,
+        }
+      );
 
-      const res = await req.json();
+      const responseUpdateHamburguer = await requisicaoUpdateHamburguer.json();
 
-      console.log(res);
+      // console.log(responseUpdateHamburguer);
+
+      // mensagem do sistema a ser mostrada acima do form
+      this.mensagem = `Pedido Nº: ${responseUpdateHamburguer.id} atualizado com sucesso para ${responseUpdateHamburguer.status}!`;
+      // limpando mensagem
+      setTimeout(() => (this.mensagem = ""), 3000);
     },
   },
 

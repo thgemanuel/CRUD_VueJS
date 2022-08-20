@@ -144,7 +144,7 @@ export default {
       this.nome = "";
       this.carne = "";
       this.pao = "";
-      this.opcionais = "";
+      this.opcionais = [];
 
       // limpando mensagem
       setTimeout(() => (this.mensagem = ""), 5000);
