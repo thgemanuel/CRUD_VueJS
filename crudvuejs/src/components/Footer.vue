@@ -1,7 +1,7 @@
 <template>
     <footer id="footer">
         <!-- para colocar o simbolo de copyright basta adicionar &copy;  -->
-        <p>Make your Burguer! &copy; 2021</p>
+        <p>Make your Burguer! &copy; 2022</p>
     </footer>
 </template>
 
