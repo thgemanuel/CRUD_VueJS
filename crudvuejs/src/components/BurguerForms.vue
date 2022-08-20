@@ -1,8 +1,8 @@
 <template>
   <div>
-    <p>componen</p>
+    <Message :mensagem="this.mensagem" v-show="this.mensagem" />
     <div>
-      <form id="burger-form">
+      <form id="burger-form" @submit="createBurguer">
         <!-- informacoes nome -->
         <div class="input-container">
           <label for="nome">Nome do cliente:</label>
@@ -31,7 +31,11 @@
           <label for="carne">Escolha a carne do seu Burguer:</label>
           <select name="carne" id="carne" v-model="carne">
             <option value="">Selecione o tipo de carne.</option>
-            <option v-for="carne in this.carnes" :key="carne.id" :value="carne.tipo">
+            <option
+              v-for="carne in this.carnes"
+              :key="carne.id"
+              :value="carne.tipo"
+            >
               {{ carne.tipo }}
             </option>
           </select>
@@ -42,14 +46,18 @@
           <label id="opcionais-title" for="opcionais "
             >Selecione os opcionais:</label
           >
-          <div class="checkbox-container" v-for="opcional in this.opcionaisdata" :key="opcional.id" >
+          <div
+            class="checkbox-container"
+            v-for="opcional in this.opcionaisdata"
+            :key="opcional.id"
+          >
             <input
               type="checkbox"
               name="opcionais"
               v-model="opcionais"
               :value="opcional.tipo"
             />
-            <span>{{opcional.tipo}}</span>
+            <span>{{ opcional.tipo }}</span>
           </div>
         </div>
 
@@ -63,6 +71,8 @@
 </template>
 
 <script>
+import Message from "./Message.vue";
+
 export default {
   name: "BurguerForms",
   data() {
@@ -74,9 +84,11 @@ export default {
       pao: null,
       carne: null,
       opcionais: [],
-      status: "Solicitado",
-      msg: null,
+      mensagem: null,
     };
+  },
+  components: {
+    Message,
   },
   methods: {
     async getIngredientes() {
@@ -89,6 +101,53 @@ export default {
       this.paes = data.paes;
       this.carnes = data.carnes;
       this.opcionaisdata = data.opcionais;
+    },
+
+    // o metodo create recebe um argumento "e" para que a aplicação pare
+    //   o evento do formulario quando clicar no botao "submit"
+    async createBurguer(e) {
+      e.preventDefault();
+
+      // objeto com todos os dados que foram informados no form
+      const data = {
+        nome: this.nome,
+        carne: this.carne,
+        pao: this.pao,
+        opcionais: Array.from(this.opcionais),
+        // os hamburgues sempre irao chegar primeiro no backend como solicitados
+        //   nunca como preparando ou finalizado
+        status: "Solicitado",
+      };
+
+      // o proximo passo é transformar o objeto data para um texto
+      const dataJson = JSON.stringify(data);
+
+      // enviando uma requisicao POST para a api
+      const requisicaoEnviarForm = await fetch(
+        "http://localhost:3000/burgers",
+        {
+          method: "POST",
+          // informar que a comunicacao é feita por json
+          headers: { "Content-Type": "application/json" },
+          body: dataJson,
+        }
+      );
+
+      const respostaRequisicaoEnviarForm = await requisicaoEnviarForm.json();
+
+      // console.log(respostaRequisicaoEnviarForm);
+
+      // mensagem do sistema a ser mostrada acima do form
+      this.mensagem = `Pedido Nº: ${respostaRequisicaoEnviarForm.id} realizado com sucesso!`;
+
+      // limpando dados
+      this.nome = "";
+      this.carne = "";
+      this.pao = "";
+      this.opcionais = [];
+
+      // limpando mensagem
+      setTimeout(() => (this.mensagem = ""), 5000);
     },
   },
   mounted() {
